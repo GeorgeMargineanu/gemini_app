@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Gemini Web</title>
+    <title>UMS Gemini GA4</title>
     <style>
         /* Reset and basic styles */
         * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -12,20 +12,35 @@
             color: #2f3640;
             display: flex;
             flex-direction: column;
-            align-items: center;
+            align-items: center; /* center content except logo */
             min-height: 100vh;
             padding: 2rem;
         }
 
+        /* Logo container at top-left */
+        .logo-container {
+            position: fixed;
+            top: 2rem;
+            left: 2rem;
+        }
+
+        .logo-container img {
+            height: 60px;
+            width: auto;
+            border-radius: 8px;
+        }
+
         h1 {
-            margin-bottom: 1rem;
             color: #273c75;
+            font-size: 1.8rem;
+            text-align: center;
+            margin-bottom: 2rem;
         }
 
         form {
             display: flex;
             width: 100%;
-            max-width: 1000px; /* wider form for long prompts */
+            max-width: 1000px;
             margin-bottom: 1rem;
         }
 
@@ -93,11 +108,19 @@
     </style>
 </head>
 <body>
-    <h1>Ask Gemini</h1>
+    <!-- Logo on the top-left corner -->
+    <div class="logo-container">
+        <img src="static/logo.png" alt="UMS Gemini Logo">
+    </div>
+
+    <!-- Main content centered -->
+    <h1>Ask Gemini about GA4 Properties</h1>
+
     <form id="geminiForm">
         <textarea id="query" placeholder="Type your question here..."></textarea>
         <button type="submit" id="askBtn">Ask</button>
     </form>
+
     <pre id="result"></pre>
 
     <script>
