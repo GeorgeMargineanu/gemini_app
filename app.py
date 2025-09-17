@@ -1,6 +1,7 @@
 from flask import Flask, request, send_from_directory, Response
 import subprocess
-import sys
+import pty
+import os
 
 app = Flask(__name__)
 
@@ -11,23 +12,36 @@ def home():
 @app.route("/query")
 def run_gemini():
     query = request.args.get("query")
+    flags = request.args.getlist("flag")  # Accept multiple flags like ?flag=--approval-mode&flag=yolo
+
     if not query:
         return "No query provided", 400
 
+    # Always include approval-mode yolo for non-interactive execution
+    if "--approval-mode" not in flags:
+        flags.extend(["--approval-mode", "yolo"])
+
+    cmd = ["gemini", "-p", query] + flags
+
     def generate():
+        # Open pseudo-terminal so Gemini runs like in terminal
+        master_fd, slave_fd = pty.openpty()
         process = subprocess.Popen(
-            ["gemini", "-p", query],  # Add flags if gemini supports unbuffered output
-            stdout=subprocess.PIPE,
-            stderr=subprocess.STDOUT,
-            text=True,
-            bufsize=1  # line-buffered
+            cmd,
+            stdout=slave_fd,
+            stderr=slave_fd,
+            stdin=slave_fd,
+            text=True
         )
-        for line in iter(process.stdout.readline, ''):
-            yield f"data: {line}\n\n"
-            sys.stdout.flush()  # flush for SSE
-        process.stdout.close()
+        os.close(slave_fd)
+
+        # Stream Gemini output line by line
+        with os.fdopen(master_fd) as stdout:
+            for line in stdout:
+                yield f"data: {line}\n\n"
+
         process.wait()
-        yield "data __DONE__\n\n" # Marker to signal frontent that the streaming finished
+        yield "data: __DONE__\n\n"
 
     return Response(generate(), mimetype='text/event-stream')
 
