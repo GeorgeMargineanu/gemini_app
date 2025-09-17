@@ -110,7 +110,8 @@
 <body>
     <!-- Logo on the top-left corner -->
     <div class="logo-container">
-        <img src="static/logo.png" alt="UMS Gemini Logo">
+        <!-- Dynamic logo via Flask/Jinja -->
+        <img src="{{ url_for('static', filename=logo_file) }}" alt="UMS Gemini Logo">
     </div>
 
     <!-- Main content centered -->

@@ -1,13 +1,15 @@
-from flask import Flask, request, send_from_directory, Response
+from flask import Flask, request, render_template, Response
 import subprocess
 import pty
 import os
 
-app = Flask(__name__)
+app = Flask(__name__, template_folder="templates")
 
 @app.route("/")
 def home():
-    return send_from_directory(".", "index.html")
+    # Get logo filename from environment variable, default to 'logo.png'
+    logo_file = os.getenv("PROJECT_LOGO", "logo.png")
+    return render_template("index.html", logo_file=logo_file)
 
 @app.route("/query")
 def run_gemini():
